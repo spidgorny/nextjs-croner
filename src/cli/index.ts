@@ -53,20 +53,9 @@ yargs(hideBin(process.argv))
   )
   .command(
     'inject',
-    'Inject cron job initialization into Next.js app',
+    'Inject cron job initialization into .next folder',
     (yargs) => {
       return yargs
-        .option('target', {
-          alias: 't',
-          type: 'string',
-          description: 'Target file to inject into (layout.tsx or _app.tsx)',
-        })
-        .option('router', {
-          alias: 'r',
-          type: 'string',
-          choices: ['app', 'pages'],
-          description: 'Next.js router type (app or pages)',
-        })
         .option('force', {
           alias: 'f',
           type: 'boolean',
@@ -76,8 +65,6 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       await injectCommand({
-        target: argv.target,
-        router: argv.router as 'app' | 'pages' | undefined,
         force: argv.force,
       });
     }

@@ -74,7 +74,7 @@ This command will:
 
 ### `build`
 
-Build and validate cron job configurations from a config file.
+Build and validate cron job configurations, and inject initialization into the standalone server.
 
 ```bash
 npx nextjs-croner build [options]
@@ -84,6 +84,12 @@ Options:
   -v, --validate    Validate cron patterns (default: true)
   -h, --help        Show help
 ```
+
+This command will:
+- Validate cron job configurations (if config file exists)
+- Inject cron initialization into `.next/standalone/server.js` (if it exists)
+
+**Important**: Run this command after `next build` to inject cron jobs into your standalone build for production deployment.
 
 Example `cron.config.js`:
 
@@ -98,6 +104,13 @@ module.exports = {
     }
   ]
 };
+```
+
+**Production Workflow:**
+```bash
+next build                    # Build your Next.js app
+npx nextjs-croner build       # Inject cron initialization
+node .next/standalone/server.js  # Run with cron jobs enabled
 ```
 
 ## Usage

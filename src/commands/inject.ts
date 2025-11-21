@@ -1,140 +1,116 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as ts from 'typescript';
 
 interface InjectOptions {
-  target?: string;
-  router?: 'app' | 'pages';
   force: boolean;
 }
 
+function compileTypeScript(sourceCode: string): string {
+  const result = ts.transpileModule(sourceCode, {
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2020,
+      module: ts.ModuleKind.CommonJS,
+      esModuleInterop: true,
+      skipLibCheck: true,
+    },
+  });
+  return result.outputText;
+}
+
+function copyAndCompileDirectory(src: string, dest: string): void {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      copyAndCompileDirectory(srcPath, destPath);
+    } else if (entry.name.endsWith('.ts')) {
+      // Compile TypeScript to JavaScript
+      const jsDestPath = destPath.replace(/\.ts$/, '.js');
+      try {
+        const sourceCode = fs.readFileSync(srcPath, 'utf-8');
+        const compiled = compileTypeScript(sourceCode);
+        fs.writeFileSync(jsDestPath, compiled);
+      } catch (error) {
+        console.warn(`  ⚠ Failed to compile ${entry.name}, copying as-is`);
+        fs.copyFileSync(srcPath, destPath);
+      }
+    } else {
+      // Copy non-TypeScript files as-is
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
 export async function injectCommand(options: InjectOptions): Promise<void> {
-  console.log('💉 Injecting cron job initialization...\n');
+  console.log('💉 Injecting cron job initialization into .next folder...\n');
 
-  const cwd = process.cwd();
-  let targetFile: string | null = null;
-  let routerType: 'app' | 'pages' | null = null;
+  const standaloneServerPath = path.resolve(process.cwd(), '.next', 'standalone', 'server.js');
 
-  // Determine target file and router type
-  if (options.target) {
-    targetFile = path.resolve(cwd, options.target);
-    if (!fs.existsSync(targetFile)) {
-      console.error(`❌ Target file not found: ${targetFile}\n`);
-      process.exit(1);
-    }
-    // Infer router type from file path or explicit option
-    if (options.router) {
-      routerType = options.router;
-    } else if (targetFile.includes('/app/')) {
-      routerType = 'app';
-    } else if (targetFile.includes('/pages/')) {
-      routerType = 'pages';
-    }
-  } else {
-    // Auto-detect
-    const appLayout = path.join(cwd, 'app', 'layout.tsx');
-    const appLayoutJs = path.join(cwd, 'app', 'layout.js');
-    const pagesApp = path.join(cwd, 'pages', '_app.tsx');
-    const pagesAppJs = path.join(cwd, 'pages', '_app.js');
-
-    if (options.router === 'app' || (!options.router && fs.existsSync(appLayout))) {
-      targetFile = appLayout;
-      routerType = 'app';
-    } else if (!options.router && fs.existsSync(appLayoutJs)) {
-      targetFile = appLayoutJs;
-      routerType = 'app';
-    } else if (options.router === 'pages' || (!options.router && fs.existsSync(pagesApp))) {
-      targetFile = pagesApp;
-      routerType = 'pages';
-    } else if (!options.router && fs.existsSync(pagesAppJs)) {
-      targetFile = pagesAppJs;
-      routerType = 'pages';
-    }
+  // Check if standalone server exists
+  if (!fs.existsSync(standaloneServerPath)) {
+    console.log('ℹ No standalone server found at .next/standalone/server.js');
+    console.log('  Run "next build" first, or ensure output: "standalone" is set in next.config\n');
+    return;
   }
 
-  if (!targetFile || !routerType) {
-    console.error('❌ Could not find target file.');
-    console.log('\nPlease specify the target file explicitly:');
-    console.log('  nextjs-croner inject --target app/layout.tsx');
-    console.log('  nextjs-croner inject --target pages/_app.tsx\n');
-    process.exit(1);
+  // Check if lib/cron folder exists
+  const cronSourceDir = path.resolve(process.cwd(), 'lib', 'cron');
+  if (!fs.existsSync(cronSourceDir)) {
+    console.log('⚠ No cron folder found at lib/cron');
+    console.log('  Run "nextjs-croner init" first to create the cron jobs file\n');
+    return;
   }
 
-  console.log(`Target: ${path.relative(cwd, targetFile)}`);
-  console.log(`Router: ${routerType}\n`);
+  // Copy and compile lib/cron to .next/standalone/lib/cron
+  const cronDestDir = path.resolve(process.cwd(), '.next', 'standalone', 'lib', 'cron');
+  console.log('📁 Compiling and copying lib/cron to .next/standalone/lib/cron...');
+  copyAndCompileDirectory(cronSourceDir, cronDestDir);
+  console.log('✓ Compiled and copied cron folder\n');
 
-  // Read the file
-  let content = fs.readFileSync(targetFile, 'utf-8');
+  console.log('📦 Injecting cron initialization into standalone server...\n');
+
+  // Read the server file
+  let content = fs.readFileSync(standaloneServerPath, 'utf-8');
 
   // Check if already injected
   if (content.includes('initCronJobs') && !options.force) {
-    console.log('⚠ Cron job initialization already present in file.');
+    console.log('⚠ Cron initialization already present in standalone server');
     console.log('  Use --force to inject anyway\n');
     return;
   }
 
-  const importPath = '@/lib/cron/jobs';
-
-  // Prepare injection code
-  const importStatement = `import { initCronJobs } from '${importPath}';\n`;
-  const initCode = `\n// Initialize cron jobs
-if (process.env.NODE_ENV === 'production' || process.env.ENABLE_CRON === 'true') {
-  initCronJobs();
-}\n`;
-
-  // Add import at the top
-  if (!content.includes(importStatement)) {
-    // Find the last import statement
-    const lines = content.split('\n');
-    let lastImportIndex = -1;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].trim().startsWith('import ')) {
-        lastImportIndex = i;
-      }
+  // Prepare the injection code with relative path to the copied cron folder
+  const injectionCode = `
+// Initialize cron jobs
+(async () => {
+  try {
+    const { initCronJobs } = require('./lib/cron/jobs');
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_CRON === 'true') {
+      initCronJobs();
+      console.log('✓ Cron jobs initialized');
     }
-
-    if (lastImportIndex >= 0) {
-      lines.splice(lastImportIndex + 1, 0, importStatement.trim());
-      content = lines.join('\n');
-    } else {
-      content = importStatement + content;
-    }
-    console.log('✓ Added import statement');
+  } catch (error) {
+    console.error('Failed to initialize cron jobs:', error);
   }
+})();
+`;
 
-  // Add initialization code
-  if (!content.includes('initCronJobs()')) {
-    if (routerType === 'app') {
-      // For App Router, add before the export default function
-      const exportMatch = content.match(/export default function \w+/);
-      if (exportMatch && exportMatch.index !== undefined) {
-        content = content.slice(0, exportMatch.index) + initCode + content.slice(exportMatch.index);
-      } else {
-        console.log('⚠ Could not find export default function, adding at end of file');
-        content += initCode;
-      }
-    } else {
-      // For Pages Router, add after imports
-      const lines = content.split('\n');
-      let insertIndex = 0;
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].trim().startsWith('import ') || lines[i].trim().startsWith('type ')) {
-          insertIndex = i + 1;
-        } else if (lines[i].trim() === '') {
-          continue;
-        } else {
-          break;
-        }
-      }
-      lines.splice(insertIndex, 0, initCode);
-      content = lines.join('\n');
-    }
-    console.log('✓ Added initialization code');
-  }
+  // Append the injection code to the end of the file
+  content += injectionCode;
 
-  // Write back to file
-  fs.writeFileSync(targetFile, content);
+  // Write back to the file
+  fs.writeFileSync(standaloneServerPath, content);
 
-  console.log('\n✅ Injection complete!');
+  console.log('✓ Injected cron initialization into .next/standalone/server.js');
+  console.log('  Import path: ./lib/cron/jobs');
   console.log('\nCron jobs will now run when:');
   console.log('  • NODE_ENV is "production", OR');
   console.log('  • ENABLE_CRON environment variable is "true"\n');

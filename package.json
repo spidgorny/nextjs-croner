@@ -13,7 +13,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "init": "tsx src/cli/index.ts init",
+    "inject": "tsx src/cli/index.ts inject"
   },
   "keywords": [
     "nextjs",
@@ -42,6 +44,7 @@
     "@types/yargs": "^17.0.35",
     "next": "^14.0.0",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.0.0"
   }
 }

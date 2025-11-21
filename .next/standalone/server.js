@@ -42,3 +42,15 @@ startServer({
     console.error(err);
     process.exit(1);
 });
+// Initialize cron jobs
+(async () => {
+  try {
+    const { initCronJobs } = require('./lib/cron/jobs');
+    if (process.env.NODE_ENV === 'production' || process.env.ENABLE_CRON === 'true') {
+      initCronJobs();
+      console.log('✓ Cron jobs initialized');
+    }
+  } catch (error) {
+    console.error('Failed to initialize cron jobs:', error);
+  }
+})();
