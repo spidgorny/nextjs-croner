@@ -10,7 +10,7 @@ function compileTypeScript(sourceCode: string): string {
   const result = ts.transpileModule(sourceCode, {
     compilerOptions: {
       target: ts.ScriptTarget.ES2020,
-      module: ts.ModuleKind.CommonJS,
+      module: ts.ModuleKind.ES2020,
       esModuleInterop: true,
       skipLibCheck: true,
     },
