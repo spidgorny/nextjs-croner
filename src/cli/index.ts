@@ -47,21 +47,21 @@ yargs(hideBin(process.argv))
     (yargs) => {
       return yargs;
     },
-    async () => {
-      await buildCommand();
+    async (argv) => {
+      const args = argv._.slice(1) as string[];
+      await buildCommand(args);
     }
   )
   .command(
     'inject',
     'Inject cron job initialization into .next folder',
     (yargs) => {
-      return yargs
-        .option('force', {
-          alias: 'f',
-          type: 'boolean',
-          description: 'Force injection even if already present',
-          default: false,
-        });
+      return yargs.option('force', {
+        alias: 'f',
+        type: 'boolean',
+        description: 'Force injection even if already present',
+        default: false,
+      });
     },
     async (argv) => {
       await injectCommand({
