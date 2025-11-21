@@ -44,9 +44,10 @@ export async function devCommand(args: string[]): Promise<void> {
 
   // Start Next.js dev server with all passed arguments
   console.log('Starting Next.js development server...\n');
-  const nextDev = spawn('next', ['dev', ...args], {
+
+  const nextPath = path.resolve(process.cwd(), 'node_modules', 'next', 'dist', 'bin', 'next');
+  const nextDev = spawn(nextPath, ['dev', ...args], {
     stdio: 'inherit',
-    shell: true,
     cwd: process.cwd(),
   });
 

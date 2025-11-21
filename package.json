@@ -42,7 +42,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/yargs": "^17.0.35",
-    "next": "^14.0.0",
+    "next": "^14.2.33",
     "prettier": "^3.6.2",
     "tsx": "^4.20.6",
     "typescript": "^5.0.0"

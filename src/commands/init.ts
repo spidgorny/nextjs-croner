@@ -34,18 +34,18 @@ export async function initCommand(options: InitOptions): Promise<void> {
  */
 export function initCronJobs(): void {
   // Example: Run every minute
-  Cron('* * * * *', () => {
+  new Cron('* * * * *', () => {
     console.log('Running cron job every minute');
   });
 
   // Example: Run every day at midnight
-  Cron('0 0 * * *', async () => {
+  new Cron('0 0 * * *', async () => {
     console.log('Running daily job at midnight');
     // Add your job logic here
   });
 
   // Example: Run every Monday at 9:00 AM
-  Cron('0 9 * * 1', { timezone: 'America/New_York' }, () => {
+  new Cron('0 9 * * 1', { timezone: 'America/New_York' }, () => {
     console.log('Running weekly job on Monday at 9 AM EST');
   });
 
