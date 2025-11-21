@@ -101,9 +101,129 @@ module.exports = { initCronJobs };
     console.log('✓ Created .env.local with ENABLE_CRON');
   }
 
+  // Modify next.config.js or next.config.mjs to enable standalone output
+  await configureNextConfig(targetDir, ext);
+
   console.log('\n✅ Initialization complete!');
   console.log('\nNext steps:');
   console.log('1. Edit lib/cron/jobs.ts to add your cron jobs');
   console.log('2. Run "nextjs-croner inject" to add initialization code to your app');
   console.log('3. Start your Next.js development server\n');
+}
+
+async function configureNextConfig(targetDir: string, ext: string): Promise<void> {
+  // Try to find next.config file
+  const possibleConfigs = [
+    'next.config.js',
+    'next.config.mjs',
+    'next.config.ts',
+    'next.config.cjs',
+  ];
+
+  let configFile: string | null = null;
+  for (const config of possibleConfigs) {
+    const configPath = path.join(targetDir, config);
+    if (fs.existsSync(configPath)) {
+      configFile = configPath;
+      break;
+    }
+  }
+
+  if (!configFile) {
+    // Create a new next.config file
+    const newConfigFile = path.join(targetDir, ext === 'ts' ? 'next.config.ts' : 'next.config.js');
+    const content =
+      ext === 'ts'
+        ? `import type { NextConfig } from 'next';
+
+const config: NextConfig = {
+  output: 'standalone',
+};
+
+export default config;
+`
+        : `/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
+};
+
+module.exports = nextConfig;
+`;
+
+    fs.writeFileSync(newConfigFile, content);
+    console.log(`✓ Created ${path.basename(newConfigFile)} with standalone output enabled`);
+    return;
+  }
+
+  // Read existing config file
+  let content = fs.readFileSync(configFile, 'utf-8');
+  const fileName = path.basename(configFile);
+
+  // Check if output is already set
+  if (content.includes('output:') || content.includes('output =')) {
+    if (content.includes("output: 'standalone'") || content.includes('output: "standalone"')) {
+      console.log(`⚠ Standalone output already configured in ${fileName}`);
+      return;
+    } else {
+      console.log(`⚠ Custom output configuration found in ${fileName}`);
+      console.log('  Please manually add "output: \'standalone\'" to your Next.js config');
+      return;
+    }
+  }
+
+  // Try to add output: 'standalone' to the config
+  const isESM = configFile.endsWith('.mjs') || configFile.endsWith('.ts');
+
+  if (isESM) {
+    // Handle ES modules (export default)
+    if (content.includes('export default')) {
+      // Try to find the config object
+      const exportMatch = content.match(/export default\s+({[\s\S]*?});?\s*$/m);
+      if (exportMatch) {
+        const configObj = exportMatch[1];
+        // Check if it's an empty object or has properties
+        if (configObj.trim() === '{}') {
+          content = content.replace(
+            /export default\s+{/,
+            "export default {\n  output: 'standalone',"
+          );
+        } else {
+          // Add after opening brace
+          content = content.replace(
+            /export default\s+{/,
+            "export default {\n  output: 'standalone',"
+          );
+        }
+        fs.writeFileSync(configFile, content);
+        console.log(`✓ Added standalone output to ${fileName}`);
+      } else {
+        console.log(`⚠ Could not parse ${fileName}`);
+        console.log('  Please manually add "output: \'standalone\'" to your Next.js config');
+      }
+    }
+  } else {
+    // Handle CommonJS (module.exports)
+    if (content.includes('module.exports')) {
+      const exportsMatch = content.match(/module\.exports\s*=\s*({[\s\S]*?});?\s*$/m);
+      if (exportsMatch) {
+        const configObj = exportsMatch[1];
+        if (configObj.trim() === '{}') {
+          content = content.replace(
+            /module\.exports\s*=\s*{/,
+            "module.exports = {\n  output: 'standalone',"
+          );
+        } else {
+          content = content.replace(
+            /module\.exports\s*=\s*{/,
+            "module.exports = {\n  output: 'standalone',"
+          );
+        }
+        fs.writeFileSync(configFile, content);
+        console.log(`✓ Added standalone output to ${fileName}`);
+      } else {
+        console.log(`⚠ Could not parse ${fileName}`);
+        console.log('  Please manually add "output: \'standalone\'" to your Next.js config');
+      }
+    }
+  }
 }

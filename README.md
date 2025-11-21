@@ -51,6 +51,7 @@ Options:
 This command will:
 - Create `lib/cron/jobs.ts` with example cron jobs
 - Add `ENABLE_CRON=true` to `.env.local`
+- Configure `next.config.js|ts` to enable standalone output mode (required for cron jobs to work in production)
 
 ### `inject`
 
