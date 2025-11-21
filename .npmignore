@@ -1,0 +1,11 @@
+src/
+tsconfig.json
+.vscode/
+.idea/
+*.test.ts
+*.test.js
+.env
+.env.local
+node_modules/
+.git/
+.DS_Store

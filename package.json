@@ -1,0 +1,41 @@
+{
+  "name": "nextjs-croner",
+  "version": "0.1.0",
+  "description": "A Next.js plugin for running cron jobs using the croner library without external tools",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nextjs",
+    "cron",
+    "croner",
+    "scheduler",
+    "task",
+    "jobs",
+    "plugin"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "peerDependencies": {
+    "next": ">=13.0.0"
+  },
+  "dependencies": {
+    "croner": "^9.1.0",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/yargs": "^17.0.35",
+    "next": "^14.0.0",
+    "typescript": "^5.0.0"
+  }
+}
