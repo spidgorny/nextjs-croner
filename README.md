@@ -14,9 +14,9 @@ A lightweight plugin that simplifies cron job management in Next.js by leveragin
 
 ## Why nextjs-croner?
 
-Building production-grade applications often requires scheduling recurring tasks—sending emails, syncing data, cleaning up resources, or running background jobs. Most solutions require external tools or complex infrastructure.
+Building production-grade applications often requires scheduling recurring tasks—sending emails, syncing data, cleaning up resources, or running background jobs. Most solutions require external infrastructure or complex tooling.
 
-**nextjs-croner** brings a simpler approach: schedule and run cron jobs directly within your Next.js application with zero external dependencies. Perfect for:
+**nextjs-croner** brings a simpler approach: schedule and run cron jobs directly within your Next.js application without requiring external services. Perfect for:
 
 - ✅ Scheduled maintenance tasks
 - ✅ Periodic data synchronization  
@@ -27,8 +27,8 @@ Building production-grade applications often requires scheduling recurring tasks
 
 ## Features
 
-- 🚀 **Zero External Tools** - Run cron jobs directly in your Next.js app
-- ⚡ **Lightweight & Fast** - Powered by the robust [croner](https://github.com/Hexagon/croner) library
+- 🚀 **No Additional Infrastructure** - Run cron jobs directly in your Next.js app (powered by [croner](https://github.com/Hexagon/croner))
+- ⚡ **Lightweight & Fast** - Minimal dependencies, built on the robust [croner](https://github.com/Hexagon/croner) library
 - 🔒 **Type-Safe** - Full TypeScript support out of the box
 - 📦 **CLI Integration** - Seamless `npx nextjs-croner` commands that replace your `next dev` and `next build` workflow
 - 🎯 **Works Everywhere** - App Router, Pages Router, and standalone builds
