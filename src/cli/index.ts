@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers';
 import { initCommand } from '../commands/init';
 import { buildCommand } from '../commands/build';
 import { injectCommand } from '../commands/inject';
+import { devCommand } from '../commands/dev';
 
 yargs(hideBin(process.argv))
   .command(
@@ -27,6 +28,17 @@ yargs(hideBin(process.argv))
     },
     async (argv) => {
       await initCommand(argv);
+    }
+  )
+  .command(
+    'dev',
+    'Start Next.js dev server with cron jobs',
+    (yargs) => {
+      return yargs;
+    },
+    async (argv) => {
+      const args = argv._.slice(1) as string[];
+      await devCommand(args);
     }
   )
   .command(
@@ -57,7 +69,7 @@ yargs(hideBin(process.argv))
       });
     }
   )
-  .demandCommand(1, 'You need to specify a command (init, build, or inject)')
+  .demandCommand(1, 'You need to specify a command (init, dev, build, or inject)')
   .help()
   .alias('help', 'h')
   .version()
