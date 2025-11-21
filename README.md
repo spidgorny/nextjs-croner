@@ -366,7 +366,7 @@ NODE_ENV=production     # Production mode
 export function initCronJobs() {
   // Only run CPU-intensive jobs in production
   if (process.env.NODE_ENV === 'production') {
-    Cron('0 2 * * *', async () => {
+    new Cron('0 2 * * *', async () => {
       await expensiveAnalyticsCalculation();
     });
   }
@@ -375,7 +375,7 @@ export function initCronJobs() {
 
 ### 2. **Always Add Error Handling**
 ```typescript
-Cron('0 * * * *', async () => {
+new Cron('0 * * * *', async () => {
   try {
     await criticalDatabaseSync();
   } catch (error) {
@@ -389,7 +389,7 @@ Cron('0 * * * *', async () => {
 ### 3. **Design for Idempotency**
 ```typescript
 // Good: Idempotent operation (safe to run multiple times)
-Cron('0 0 * * *', async () => {
+new Cron('0 0 * * *', async () => {
   await db.updateTable.update({ 
     updatedAt: new Date() 
   }, { 
@@ -398,14 +398,14 @@ Cron('0 0 * * *', async () => {
 });
 
 // Avoid: Non-idempotent operation
-// Cron('0 0 * * *', async () => {
+// new Cron('0 0 * * *', async () => {
 //   await emailUser(); // Could send duplicate emails!
 // });
 ```
 
 ### 4. **Add Comprehensive Logging**
 ```typescript
-Cron('*/5 * * * *', async () => {
+new Cron('*/5 * * * *', async () => {
   const startTime = Date.now();
   try {
     console.log('[CRON] Starting cache refresh...');
@@ -421,19 +421,19 @@ Cron('*/5 * * * *', async () => {
 ### 5. **Be Mindful of Resource Usage**
 ```typescript
 // ✅ Good: Reasonable frequency
-Cron('0 * * * *', async () => {
+new Cron('0 * * * *', async () => {
   await syncData();
 });
 
 // ❌ Avoid: Too frequent without reason
-// Cron('* * * * *', async () => {
+// new Cron('* * * * *', async () => {
 //   await expensiveOperation(); // Runs 1440 times per day!
 // });
 ```
 
 ### 6. **Monitor Long-Running Jobs**
 ```typescript
-Cron('0 */6 * * *', async () => {
+new Cron('0 */6 * * *', async () => {
   const timeout = setTimeout(() => {
     console.error('[CRON] Job timeout after 5 minutes');
   }, 5 * 60 * 1000);
@@ -540,7 +540,7 @@ A: Implement distributed locking using Redis, a database, or a distributed lock 
 A: Yes! You can call API routes from your cron jobs using `fetch()`:
 
 ```typescript
-Cron('0 * * * *', async () => {
+new Cron('0 * * * *', async () => {
   await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sync`, {
     method: 'POST'
   });
