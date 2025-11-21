@@ -551,6 +551,30 @@ A: Croner queues the next execution. The jobs run sequentially, not in parallel.
 **Q: Can I modify cron jobs after the app has started?**
 A: Yes, if you keep a reference to the job object and call `.stop()` on it. However, this is not recommended for production environments.
 
+## TODO / Roadmap
+
+We're actively working on expanding nextjs-croner with the following features:
+
+### Planned Features
+
+- [ ] **Job Persistence** - Store job results and execution history in a database
+- [ ] **Web Dashboard** - Visual interface to monitor, manage, and trigger cron jobs
+- [ ] **Distributed Locking** - Built-in support for Redis/Database-backed distributed locks to prevent duplicate execution
+- [ ] **Retry Logic** - Automatic retry mechanism with exponential backoff for failed jobs
+- [ ] **Job Webhooks** - Send notifications to external services on job start, success, or failure
+- [ ] **Metrics & Monitoring** - Export job execution metrics for Prometheus or other monitoring tools
+- [ ] **Job Queuing** - Support for job queues with priority levels
+- [ ] **Scheduled Job Editor** - CLI or web interface to edit cron patterns without code changes
+- [ ] **Database Drivers** - Official support for popular databases (PostgreSQL, MongoDB, MySQL)
+- [ ] **Vercel Deployment Guide** - Best practices and examples for deploying on Vercel
+- [ ] **Job Testing Utilities** - Testing helpers and mocks for easier cron job testing
+- [ ] **Multi-timezone Scheduling** - Enhanced support for scheduling across multiple timezones
+- [ ] **Health Checks** - Built-in health check endpoint to verify cron job system status
+
+### Contributions Welcome
+
+Have an idea for a feature? We'd love to hear it! Please open an issue or submit a pull request to help improve nextjs-croner.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
