@@ -92,7 +92,7 @@ export async function injectCommand(options: InjectOptions): Promise<void> {
 // Initialize cron jobs
 (async () => {
   try {
-    const { initCronJobs } = require('./lib/cron/jobs');
+    const { initCronJobs } = await import('./lib/cron/jobs.js');
     if (process.env.NODE_ENV === 'production' || process.env.ENABLE_CRON === 'true') {
       initCronJobs();
       console.log('✓ Cron jobs initialized');
