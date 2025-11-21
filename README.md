@@ -10,11 +10,93 @@ A Next.js plugin for running cron jobs using the [croner](https://github.com/Hex
 - TypeScript support
 - Easy to configure and manage
 - Works with Next.js 13+ (App Router and Pages Router)
+- CLI tool for quick setup and configuration
 
 ## Installation
 
 ```bash
 npm install nextjs-croner
+```
+
+## Quick Start
+
+The easiest way to get started is using the CLI:
+
+```bash
+# Initialize cron jobs in your project
+npx nextjs-croner init
+
+# Inject initialization code into your Next.js app
+npx nextjs-croner inject
+
+# Build and validate your cron configuration (optional)
+npx nextjs-croner build
+```
+
+## CLI Commands
+
+### `init`
+
+Initialize nextjs-croner in your Next.js project. Creates example cron job files and configuration.
+
+```bash
+npx nextjs-croner init [options]
+
+Options:
+  -d, --directory   Target directory for initialization (default: ".")
+  --ts, --typescript  Use TypeScript (default: true)
+  -h, --help        Show help
+```
+
+This command will:
+- Create `lib/cron/jobs.ts` with example cron jobs
+- Add `ENABLE_CRON=true` to `.env.local`
+
+### `inject`
+
+Inject cron job initialization code into your Next.js app (layout.tsx or _app.tsx).
+
+```bash
+npx nextjs-croner inject [options]
+
+Options:
+  -t, --target      Target file to inject into (auto-detected if not specified)
+  -r, --router      Next.js router type: "app" or "pages" (auto-detected if not specified)
+  -f, --force       Force injection even if already present
+  -h, --help        Show help
+```
+
+This command will:
+- Auto-detect your Next.js router type (App Router or Pages Router)
+- Add the import statement for `initCronJobs`
+- Add initialization code with environment variable check
+
+### `build`
+
+Build and validate cron job configurations from a config file.
+
+```bash
+npx nextjs-croner build [options]
+
+Options:
+  -c, --config      Path to cron configuration file (default: "./cron.config.js")
+  -v, --validate    Validate cron patterns (default: true)
+  -h, --help        Show help
+```
+
+Example `cron.config.js`:
+
+```javascript
+module.exports = {
+  jobs: [
+    {
+      name: 'daily-cleanup',
+      pattern: '0 0 * * *',
+      handler: () => console.log('Running daily cleanup'),
+      options: { timezone: 'America/New_York' }
+    }
+  ]
+};
 ```
 
 ## Usage
