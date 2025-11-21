@@ -31,24 +31,12 @@ yargs(hideBin(process.argv))
   )
   .command(
     'build',
-    'Build and validate cron job configurations',
+    'Build Next.js project and inject cron jobs',
     (yargs) => {
-      return yargs
-        .option('config', {
-          alias: 'c',
-          type: 'string',
-          description: 'Path to cron configuration file',
-          default: './cron.config.js',
-        })
-        .option('validate', {
-          alias: 'v',
-          type: 'boolean',
-          description: 'Validate cron patterns',
-          default: true,
-        });
+      return yargs;
     },
-    async (argv) => {
-      await buildCommand(argv);
+    async () => {
+      await buildCommand();
     }
   )
   .command(
