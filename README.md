@@ -85,12 +85,12 @@ import { Cron } from 'croner';
 
 export function initCronJobs() {
   // Example: Run every minute
-  Cron('* * * * *', () => {
+  new Cron('* * * * *', () => {
     console.log('This runs every minute');
   });
 
   // Example: Run daily at midnight
-  Cron('0 0 * * *', () => {
+  new Cron('0 0 * * *', () => {
     console.log('Running daily task at midnight');
   });
 }
@@ -224,12 +224,12 @@ import { Cron } from 'croner';
 
 export function initCronJobs() {
   // Run every minute
-  Cron('* * * * *', () => {
+  new Cron('* * * * *', () => {
     console.log('Running cron job every minute');
   });
 
   // Run every day at midnight
-  Cron('0 0 * * *', () => {
+  new Cron('0 0 * * *', () => {
     console.log('Running daily job at midnight');
   });
 }
@@ -240,16 +240,18 @@ export function initCronJobs() {
 ```typescript
 import { Cron } from 'croner';
 
-Cron('0 * * * *', async () => {
-  try {
-    // Your job logic here
-    await syncDatabaseCache();
-    console.log('✓ Cache sync completed');
-  } catch (error) {
-    console.error('❌ Cache sync failed:', error);
-    // Send alert to monitoring service
-  }
-});
+export function initCronJobs() {
+	new Cron('0 * * * *', async () => {
+		try {
+			// Your job logic here
+			await syncDatabaseCache();
+			console.log('✓ Cache sync completed');
+		} catch (error) {
+			console.error('❌ Cache sync failed:', error);
+			// Send alert to monitoring service
+		}
+	});
+}
 ```
 
 ### With Timezone Support
@@ -258,12 +260,12 @@ Cron('0 * * * *', async () => {
 import { Cron } from 'croner';
 
 // Run every day at 9:00 AM Eastern Time
-Cron('0 9 * * *', { timezone: 'America/New_York' }, () => {
+new Cron('0 9 * * *', { timezone: 'America/New_York' }, () => {
   console.log('Running at 9 AM ET');
 });
 
 // Run every day at 6:00 PM UTC
-Cron('0 18 * * *', { timezone: 'UTC' }, () => {
+new Cron('0 18 * * *', { timezone: 'UTC' }, () => {
   console.log('Running at 6 PM UTC');
 });
 ```
@@ -288,22 +290,22 @@ import { Cron } from 'croner';
 
 export function initCronJobs() {
   // Sync user data every 30 minutes
-  Cron('*/30 * * * *', async () => {
+  new Cron('*/30 * * * *', async () => {
     await syncUserData();
   });
 
   // Send email digests every morning at 8 AM
-  Cron('0 8 * * *', async () => {
+  new Cron('0 8 * * *', async () => {
     await sendEmailDigests();
   });
 
   // Clean up old sessions every hour
-  Cron('0 * * * *', async () => {
+  new Cron('0 * * * *', async () => {
     await cleanupOldSessions();
   });
 
   // Generate daily reports at midnight
-  Cron('0 0 * * *', async () => {
+  new Cron('0 0 * * *', async () => {
     await generateDailyReports();
   });
 }
