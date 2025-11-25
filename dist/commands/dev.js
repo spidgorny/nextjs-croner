@@ -55,7 +55,7 @@ async function devCommand(args) {
         // Initialize cron jobs
         try {
             console.log('📅 Initializing cron jobs...');
-            const cronModule = require(cronJobsFile);
+            const cronModule = await Promise.resolve(`${cronJobsFile}`).then(s => __importStar(require(s)));
             if (cronModule.initCronJobs) {
                 cronModule.initCronJobs();
                 console.log('✓ Cron jobs initialized\n');

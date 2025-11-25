@@ -23,7 +23,7 @@ export async function devCommand(args: string[]): Promise<void> {
     // Initialize cron jobs
     try {
       console.log('📅 Initializing cron jobs...');
-      const cronModule = require(cronJobsFile);
+      const cronModule = await import(cronJobsFile);
       if (cronModule.initCronJobs) {
         cronModule.initCronJobs();
         console.log('✓ Cron jobs initialized\n');

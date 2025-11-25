@@ -2,6 +2,7 @@
   "name": "nextjs-croner",
   "version": "0.1.0",
   "description": "Run background jobs and cron schedules directly within your Next.js application",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
