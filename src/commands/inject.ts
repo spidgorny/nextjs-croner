@@ -6,14 +6,61 @@ interface InjectOptions {
   force: boolean;
 }
 
+function loadTsConfig(): ts.CompilerOptions {
+  const tsconfigPath = path.resolve(process.cwd(), 'tsconfig.json');
+
+  if (fs.existsSync(tsconfigPath)) {
+    try {
+      const configFile = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+      if (configFile.error) {
+        console.warn('⚠ Failed to read tsconfig.json, using default compiler options');
+        return getDefaultCompilerOptions();
+      }
+
+      const parsed = ts.parseJsonConfigFileContent(
+        configFile.config,
+        ts.sys,
+        path.dirname(tsconfigPath)
+      );
+
+      if (parsed.errors.length > 0) {
+        console.warn('⚠ Failed to parse tsconfig.json, using default compiler options');
+        return getDefaultCompilerOptions();
+      }
+
+      // Override certain options needed for compilation
+      return {
+        ...parsed.options,
+        noEmit: false, // We need to emit for compilation
+        module: ts.ModuleKind.ES2020, // Ensure ES2020 modules for Next.js standalone
+      };
+    } catch (error) {
+      console.warn('⚠ Error loading tsconfig.json, using default compiler options');
+      return getDefaultCompilerOptions();
+    }
+  }
+
+  return getDefaultCompilerOptions();
+}
+
+function getDefaultCompilerOptions(): ts.CompilerOptions {
+  return {
+    target: ts.ScriptTarget.ES2020,
+    module: ts.ModuleKind.ES2020,
+    esModuleInterop: true,
+    skipLibCheck: true,
+  };
+}
+
+let cachedCompilerOptions: ts.CompilerOptions | null = null;
+
 function compileTypeScript(sourceCode: string): string {
+  if (!cachedCompilerOptions) {
+    cachedCompilerOptions = loadTsConfig();
+  }
+
   const result = ts.transpileModule(sourceCode, {
-    compilerOptions: {
-      target: ts.ScriptTarget.ES2020,
-      module: ts.ModuleKind.ES2020,
-      esModuleInterop: true,
-      skipLibCheck: true,
-    },
+    compilerOptions: cachedCompilerOptions,
   });
   return result.outputText;
 }
