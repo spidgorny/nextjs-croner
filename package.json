@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "croner": "^9.1.0",
+    "dotenv-expand": "^12.0.3",
     "yargs": "^18.0.0"
   },
   "devDependencies": {
