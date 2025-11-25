@@ -7,4 +7,4 @@ export interface CronJob {
   options?: CronOptions;
 }
 
-export { CronOptions };
+export type { CronOptions };
